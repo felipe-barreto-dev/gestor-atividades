@@ -1,101 +1,128 @@
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useState } from "react"
-import { Link } from "react-router-dom"
+import { useState } from "react";
+import "./styles.css";
+import { Link, useNavigate } from "react-router-dom";
 
 type Usuario = {
-  nome: string
-  login: string
-  senha: string
-}
+  nome: string;
+  sobrenome: string;
+  data_nascimento: string;
+  login: string;
+  senha: string;
+};
 
-const baseURL = 'http://localhost:5000'
+const baseURL = "http://localhost:5000";
 
 export default function Cadastro() {
-  const [novoUsuario, setNovoUsuario] = useState<Usuario>({} as Usuario)
+  const navigate = useNavigate();
+  const [novoUsuario, setNovoUsuario] = useState<Usuario>({} as Usuario);
 
   const criarUsuario = async () => {
     try {
-      fetch(baseURL + '/usuarios.php', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(novoUsuario)
-      })
-      .then(response => response.json())
-      .then(data => {
-          console.log(data);
-      })
-      .catch(error => {
-          console.error('Erro ao criar usuario:', error);
+      const response = await fetch(baseURL + '/usuarios.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(novoUsuario)
       });
+
+      if (!response.ok) {
+        throw new Error('Falha na criação de usuário');
+      }
+
+      alert(`Usuário ${novoUsuario.login} criado com sucesso`)
+
+      navigate('/login');
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <div className="h-screen flex dark:bg-slate-800">
-      <Card className="m-auto max-w-sm bg-white">
-        <CardHeader>
-          <CardTitle className="text-xl">Cadastro</CardTitle>
-          <CardDescription>
-            Insira seus dados para criar uma conta
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Nome</Label>
-              <Input 
-                value={novoUsuario.nome} 
-                onChange={(e) => setNovoUsuario((previous) => ({...previous, nome: e.target.value}))} 
-                id="name" 
-                placeholder="Insira seu nome" 
-                required 
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="login">Login</Label>
-              <Input
-                value={novoUsuario.login} 
-                onChange={(e) => setNovoUsuario((previous) => ({...previous, login: e.target.value}))} 
-                id="login"
-                placeholder="Insira seu nome de usuário"
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input 
-                id="password"
-                value={novoUsuario.senha} 
-                onChange={(e) => setNovoUsuario((previous) => ({...previous, senha: e.target.value}))} 
-                type="password"
-                placeholder="Insira sua senha" 
-              />
-            </div>
-            <Button onClick={criarUsuario} variant="outline" type="submit" className="w-full">
+    <div className="login template d-flex justify-content-center align-items-center vh-100 bg-primary">
+      <div className="50-w p-5 rounded bg-white">
+        <form>
+          <h3 className="text-center">Cadastrar</h3>
+          <div className="mb-2">
+            <label htmlFor="nome">Nome</label>
+            <input
+              type="text"
+              value={novoUsuario.nome}
+              onChange={(e) =>
+                setNovoUsuario((previous) => ({
+                  ...previous,
+                  nome: e.target.value,
+                }))
+              }
+              className="form-control"
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="sobrenome">Sobrenome</label>
+            <input
+              value={novoUsuario.sobrenome}
+              onChange={(e) =>
+                setNovoUsuario((previous) => ({
+                  ...previous,
+                  sobrenome: e.target.value,
+                }))
+              }
+              type="text"
+              className="form-control"
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="data_nascimento">Data de Nascimento</label>
+            <input
+              value={novoUsuario.data_nascimento}
+              onChange={(e) =>
+                setNovoUsuario((previous) => ({
+                  ...previous,
+                  data_nascimento: e.target.value,
+                }))
+              }
+              type="date"
+              className="form-control"
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="login">Login</label>
+            <input
+              value={novoUsuario.login}
+              onChange={(e) =>
+                setNovoUsuario((previous) => ({
+                  ...previous,
+                  login: e.target.value,
+                }))
+              }
+              type="text"
+              className="form-control"
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="password">Senha</label>
+            <input
+              value={novoUsuario.senha}
+              onChange={(e) =>
+                setNovoUsuario((previous) => ({
+                  ...previous,
+                  senha: e.target.value,
+                }))
+              }
+              type="password"
+              className="form-control"
+            />
+          </div>
+          <div className="d-grid">
+            <button onClick={criarUsuario} className="btn btn-primary">
               Cadastrar
-            </Button>
+            </button>
           </div>
-          <div className="mt-4 text-center text-sm">
-            Já tem uma conta?{" "}
-            <Link to="/login" className="underline">
-              Entrar
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+          <p className="text-end mt-2">
+            <Link to="/login">Entrar</Link>
+          </p>
+        </form>
+      </div>
     </div>
-  )
+  );
 }

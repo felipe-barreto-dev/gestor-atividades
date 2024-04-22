@@ -1,14 +1,3 @@
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 
@@ -40,41 +29,43 @@ export default function Login() {
       // Armazenar o token JWT em um cookie
       document.cookie = `token=${token}`;
 
-      return navigate('/gestor');
+      navigate('/gestor');
     } catch (error) {
       console.error('Erro ao autenticar usuário:', error);
     }
   };
 
   return (
-    <div className="h-screen flex dark:bg-slate-800">
-      <Card className="m-auto max-w-sm bg-white">
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Preencha seu login para entrar com sua conta
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Login</Label>
-            <Input value={login} onChange={(e) => setLogin(e.target.value)} placeholder="Nome de usuário" required />
+    <div className="signup template d-flex justify-content-center align-items-center vh-100 bg-primary">
+      <div className="50-w p-5 rounded bg-white">
+        <form onSubmit={(e) => e.preventDefault()}>
+          <h3 className="text-center">Entrar</h3>
+          <div className="mb-2">
+            <label htmlFor="login">Login</label>
+            <input 
+              value={login} 
+              onChange={(e) => setLogin(e.target.value)}
+              type="text" 
+              className="form-control" 
+            />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Senha</Label>
-            <Input value={senha} onChange={(e) => setSenha(e.target.value)} id="password" type="password" required />
+          <div className="mb-2">
+            <label htmlFor="password">Senha</label>
+            <input
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              type="password" 
+              className="form-control" 
+            />
           </div>
-        </CardContent>
-        <CardFooter className="flex flex-col">
-          <Button onClick={autenticar} variant="outline" className="w-full">Entrar</Button>
-          <div className="mt-4 text-center text-sm">
-            Ainda não tem uma conta?{" "}
-            <Link to="/cadastro" className="underline">
-              Cadastrar
-            </Link>
+          <div className="d-grid">
+            <button onClick={autenticar} className="btn btn-primary">Entrar</button>
           </div>
-        </CardFooter>
-      </Card>
+          <p className="text-end mt-2">
+            <Link to="/cadastro">Cadastrar</Link>
+          </p>
+        </form>
+      </div>
     </div>
   )
 }

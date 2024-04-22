@@ -23,10 +23,12 @@ try {
 // Função para adicionar uma nova usuario
 function adicionarUsuario($conexao, $dados) {
     $usuario = json_decode($dados, true);
-    $consulta = $conexao->prepare("INSERT INTO usuarios (login, senha, nome) VALUES (:login, :senha, :nome)");
+    $consulta = $conexao->prepare("INSERT INTO usuarios (login, senha, nome, sobrenome, data_nascimento) VALUES (:login, :senha, :nome, :sobrenome, :data_nascimento)");
     $consulta->bindParam(':login', $usuario['login']);
     $consulta->bindValue(':senha', $usuario['senha']);
     $consulta->bindParam(':nome', $usuario['nome']);
+    $consulta->bindParam(':sobrenome', $usuario['sobrenome']);
+    $consulta->bindParam(':data_nascimento', $usuario['data_nascimento']);
     $consulta->execute();
     return json_encode(['mensagem' => 'Usuario adicionada com sucesso']);
 }

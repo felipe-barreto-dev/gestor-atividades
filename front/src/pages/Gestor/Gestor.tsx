@@ -1,14 +1,5 @@
 import { useEffect, useState } from "react"
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 
@@ -119,34 +110,6 @@ function Gestor() {
           </div>
         </nav>
         <div className="flex justify-center item-center">
-          <Table className="bg-white">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Título</TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Criada em</TableHead>
-                <TableHead className="text-right">Data de Conclusão</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {atividades.map(atividade => (
-                <TableRow>
-                  <TableCell className="font-medium">{atividade.titulo}</TableCell>
-                  <TableCell>{atividade.titulo}</TableCell>
-                  <TableCell>{atividade.titulo}</TableCell>
-                  <TableCell className="text-right">{atividade.titulo}</TableCell>
-                  <TableCell className="text-right">{atividade.titulo}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={3}>Total</TableCell>
-                <TableCell className="text-right">$2,500.00</TableCell>
-              </TableRow>
-            </TableFooter>
-          </Table>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline">Show Dialog</Button>
@@ -159,13 +122,14 @@ function Gestor() {
                   account and remove your data from our servers.
                 </AlertDialogDescription>
               </AlertDialogHeader>
+
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction>Continue</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-            {/* <table className="table table-light table-striped">
+            <table className="table table-light table-striped">
               <thead className="table-dark">
                 <tr>
                   <th scope="col">#</th>
@@ -201,23 +165,33 @@ function Gestor() {
                   </td>
                 </tr>
               </tfoot>
-            </table> */}
+            </table>
         </div>
       </div>
         
-      {/* <div id="myModalCriar" className="modal fade" role="dialog">
+      <div id="myModalCriar" className="modal fade" role="dialog">
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
               <h4 className="modal-title">Nova Atividade</h4>
             </div>
-            <div className="modal-body">
-              <div className="input-group mb-3">
-                <div className="input-group-prepend">
-                  <span className="input-group-text" id="inputGroup-sizing-default">Atividade</span>
+            <div className="modal-body d-flex justify-content-center">
+              <form style={{ width: '26rem' }}>
+                <div data-mdb-input-init className="form-outline mb-4">
+                  <label className="form-label" htmlFor="form4Example1">Título</label>
+                  <input type="text" id="form4Example1" className="form-control" />
                 </div>
-                <input type="text" id="txtCriarAtividade" className="form-control" aria-label="Atividade" aria-describedby="inputGroup-sizing-default" />
-              </div>
+
+                <div data-mdb-input-init className="form-outline mb-4">
+                  <label className="form-label" htmlFor="form4Example2">Email address</label>
+                  <input type="email" id="form4Example2" className="form-control" />
+                </div>
+
+                <div data-mdb-input-init className="form-outline mb-4">
+                  <label className="form-label" htmlFor="form4Example3">Descrição</label>
+                  <textarea className="form-control" id="form4Example3" rows={4}></textarea>
+                </div>
+              </form>
             </div>
             <div className="modal-footer">
               <button id="criar" type="button" className="btn btn-primary btn-criar" data-dismiss="modal">Criar</button>
@@ -264,7 +238,7 @@ function Gestor() {
             </div>
           </div>
         </div>
-      </div> */}
+      </div>
     </>
   )
 }
