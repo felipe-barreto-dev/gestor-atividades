@@ -35,7 +35,7 @@ function verificarToken()
 // Definindo o cabeçalho para permitir acesso de qualquer origem (CORS)
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 $servidor = "localhost";
@@ -120,12 +120,34 @@ function atualizarAtividade($conexao, $dados, $usuario_id)
     }
 }
 
+function atualizarStatusAtividade($conexao, $usuario_id, $id_atividade, $novo_status)
+{
+    try {
+        $consulta = $conexao->prepare("UPDATE atividades SET status = :status WHERE id = :id AND id_usuario = :usuario_id");
+        $consulta->bindParam(':status', $novo_status);
+        $consulta->bindParam(':id', $id_atividade);
+        $consulta->bindParam(':usuario_id', $usuario_id);
+        $consulta->execute();
+
+        if ($consulta->rowCount() > 0) {
+            return ['mensagem' => 'Status da atividade atualizado para concluído'];
+        } else {
+            http_response_code(404); // Not Found
+            return ['mensagem' => 'Atividade não encontrada'];
+        }
+    } catch (PDOException $e) {
+        http_response_code(500); // Internal Server Error
+        return ['mensagem' => 'Erro ao atualizar o status da atividade: ' . $e->getMessage()];
+    }
+}
+
+
 $metodo_requisicao = $_SERVER["REQUEST_METHOD"];
 switch ($metodo_requisicao) {
     case 'OPTIONS':
         // Responder ao preflight request (pré-requisição)
         header("Access-Control-Allow-Origin: *");
-        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH");
         header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
         break;
     case 'GET':
@@ -153,6 +175,20 @@ switch ($metodo_requisicao) {
         $usuario_id = verificarToken();
         $dados = file_get_contents("php://input");
         echo json_encode(atualizarAtividade($conexao, $dados, $usuario_id));
+        break;
+    case 'PATCH':
+        $usuario_id = verificarToken();
+        $dados = json_decode(file_get_contents("php://input"), true);
+        $id_atividade = $dados['id'] ?? null;
+        $novo_status = 'concluído';
+
+        if (!$id_atividade) {
+            http_response_code(400); // Bad Request
+            echo json_encode(['mensagem' => 'ID da atividade não fornecido']);
+            exit;
+        }
+
+        echo json_encode(atualizarStatusAtividade($conexao, $usuario_id, $id_atividade, $novo_status));
         break;
     default:
         http_response_code(405);

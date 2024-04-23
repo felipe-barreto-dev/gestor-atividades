@@ -14,14 +14,15 @@ $banco_de_dados = "gestor_atividades";
 try {
     $conexao = new PDO("mysql:host=$servidor;dbname=$banco_de_dados", $usuario, $senha);
     $conexao->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
+} catch (PDOException $e) {
     http_response_code(500); // Internal Server Error
     echo json_encode(["mensagem" => "Erro na conexão com o banco de dados: " . $e->getMessage()]);
     exit();
 }
 
 // Função para adicionar uma nova usuario
-function adicionarUsuario($conexao, $dados) {
+function adicionarUsuario($conexao, $dados)
+{
     $usuario = json_decode($dados, true);
     $consulta = $conexao->prepare("INSERT INTO usuarios (login, senha, nome, sobrenome, data_nascimento) VALUES (:login, :senha, :nome, :sobrenome, :data_nascimento)");
     $consulta->bindParam(':login', $usuario['login']);
@@ -37,11 +38,11 @@ function adicionarUsuario($conexao, $dados) {
 $metodo_requisicao = $_SERVER["REQUEST_METHOD"];
 switch ($metodo_requisicao) {
     case 'OPTIONS':
-      // Requisição preflight, retornar os cabeçalhos CORS permitidos
-      header("Access-Control-Allow-Origin: *");
-      header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
-      header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-      break;
+        // Requisição preflight, retornar os cabeçalhos CORS permitidos
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+        header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+        break;
     case 'POST':
         $dados = file_get_contents("php://input");
         echo adicionarUsuario($conexao, $dados);

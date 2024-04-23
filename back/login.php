@@ -6,13 +6,14 @@ use Firebase\JWT\JWT;
 
 define('SECRET_KEY', 'sua_chave_secreta');
 
-function gerarToken($usuario_id) {
-  $payload = array(
-    "usuario_id" => $usuario_id,
-    "exp" => time() + 3600
-  );
+function gerarToken($usuario_id)
+{
+    $payload = array(
+        "usuario_id" => $usuario_id,
+        "exp" => time() + 3600
+    );
 
-  return JWT::encode($payload, SECRET_KEY, 'HS256');
+    return JWT::encode($payload, SECRET_KEY, 'HS256');
 }
 
 
@@ -29,7 +30,7 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 try {
     $conexao = new PDO("mysql:host=$servidor;dbname=$banco_de_dados", $usuario_bd, $senha_bd);
     $conexao->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
+} catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(["mensagem" => "Erro na conexão com o banco de dados: " . $e->getMessage()]);
     exit();
@@ -51,7 +52,7 @@ switch ($metodo_requisicao) {
         $consulta->bindParam(':senha', $credenciais['senha']);
         $consulta->execute();
         $usuario = $consulta->fetch(PDO::FETCH_ASSOC);
-    
+
         if ($usuario) {
             $token = gerarToken($usuario['id']);
             echo json_encode(array("token" => $token));

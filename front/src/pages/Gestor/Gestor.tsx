@@ -156,6 +156,37 @@ function Gestor() {
     }
   };
 
+  const marcarAtividadeConcluida = async (id: number) => {
+    try {
+      const cookie = document.cookie
+        .split(";")
+        .find((cookie) => cookie.trim().startsWith("token="));
+      if (!cookie) {
+        throw new Error("Token não encontrado no cookie");
+      }
+      const token = cookie.split("=")[1];
+
+      const response = await fetch(`${baseURL}/atividades.php`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id, status: "concluído" }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao marcar a atividade como concluída");
+      }
+
+      const data = await response.json();
+      alert(data.mensagem);
+      fetchAtividades();
+    } catch (error) {
+      console.error("Erro ao marcar a atividade como concluída:", error);
+    }
+  };
+
   useEffect(() => {
     fetchAtividades();
   }, []);
@@ -211,7 +242,17 @@ function Gestor() {
             </thead>
             <tbody id="atividades">
               {atividades.map((atividade) => (
-                <tr key={atividade.id}>
+                <tr
+                  style={{
+                    backgroundColor:
+                      atividade.status === "concluído"
+                        ? "#dff0d8" // Verde
+                        : new Date(atividade.data_conclusao) < new Date()
+                        ? "#f2dede" // Vermelho
+                        : "",
+                  }}
+                  key={atividade.id}
+                >
                   <th scope="row">{atividade.id}</th>
                   <td id="content${atividade.index}">{atividade.titulo}</td>
                   <td id="content${atividade.index}">{atividade.descricao}</td>
@@ -237,7 +278,11 @@ function Gestor() {
                     >
                       <i className="fa fa-trash"></i>
                     </button>
-                    <button className="btn done" id="done${atividade.index}">
+                    <button
+                      onClick={() => marcarAtividadeConcluida(atividade.id)}
+                      className="btn done"
+                      id="done${atividade.index}"
+                    >
                       <i
                         className="fa-solid fa-check"
                         style={{ color: "green" }}
