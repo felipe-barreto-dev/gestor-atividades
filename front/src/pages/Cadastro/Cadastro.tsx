@@ -41,7 +41,7 @@ export default function Cadastro() {
   return (
     <div className="login template d-flex justify-content-center align-items-center vh-100 bg-primary">
       <div className="50-w p-5 rounded bg-white">
-        <form>
+        <form onSubmit={(e) => e.preventDefault()}>
           <h3 className="text-center">Cadastrar</h3>
           <div className="mb-2">
             <label htmlFor="nome">Nome</label>
