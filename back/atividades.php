@@ -5,7 +5,8 @@ use Firebase\JWT\Key;
 
 define('SECRET_KEY', 'sua_chave_secreta');
 
-function verificarToken() {
+function verificarToken()
+{
     $token = null;
 
     $headers = apache_request_headers();
@@ -17,7 +18,7 @@ function verificarToken() {
     if ($token) {
         try {
             $decoded = JWT::decode($token, new Key(SECRET_KEY, 'HS256'));
-            
+
             return $decoded->usuario_id;
         } catch (Exception $e) {
             http_response_code(401); // Unauthorized
@@ -45,13 +46,14 @@ $banco_de_dados = "gestor_atividades";
 try {
     $conexao = new PDO("mysql:host=$servidor;dbname=$banco_de_dados", $usuario, $senha);
     $conexao->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
+} catch (PDOException $e) {
     http_response_code(500); // Internal Server Error
     echo json_encode(["mensagem" => "Erro na conexão com o banco de dados: " . $e->getMessage()]);
     exit();
 }
 
-function obterAtividadesDoUsuario($conexao, $usuario_id) {
+function obterAtividadesDoUsuario($conexao, $usuario_id)
+{
     $consulta = $conexao->prepare("SELECT * FROM atividades WHERE id_usuario = :usuario_id");
     $consulta->bindParam(':usuario_id', $usuario_id);
     $consulta->execute();
@@ -59,7 +61,8 @@ function obterAtividadesDoUsuario($conexao, $usuario_id) {
     return json_encode($resultados);
 }
 
-function adicionarAtividade($conexao, $dados, $usuario_id) {
+function adicionarAtividade($conexao, $dados, $usuario_id)
+{
     $atividade = json_decode($dados, true);
     $consulta = $conexao->prepare("INSERT INTO atividades (titulo, data_criacao, id_usuario, data_conclusao, descricao) VALUES (:titulo, :data_criacao, :id_usuario, :data_conclusao, :descricao)");
     $consulta->bindParam(':titulo', $atividade['titulo']);
@@ -71,7 +74,8 @@ function adicionarAtividade($conexao, $dados, $usuario_id) {
     return json_encode(['mensagem' => 'Atividade adicionada com sucesso']);
 }
 
-function excluirAtividade($conexao, $id_atividade, $usuario_id) {
+function excluirAtividade($conexao, $id_atividade, $usuario_id)
+{
     $consulta = $conexao->prepare("DELETE FROM atividades WHERE id = :id AND id_usuario = :usuario_id");
     $consulta->bindParam(':id', $id_atividade);
     $consulta->bindParam(':usuario_id', $usuario_id);
@@ -82,6 +86,37 @@ function excluirAtividade($conexao, $id_atividade, $usuario_id) {
     } else {
         http_response_code(404); // Not Found
         return ['mensagem' => 'Atividade não encontrada'];
+    }
+}
+
+function atualizarAtividade($conexao, $dados, $usuario_id)
+{
+    $atividade = json_decode($dados, true);
+
+    if (!isset($atividade['id'])) {
+        http_response_code(400); // Bad Request
+        echo json_encode(['mensagem' => 'ID da atividade não fornecido']);
+        exit;
+    }
+
+    try {
+        $consulta = $conexao->prepare("UPDATE atividades SET titulo = :titulo, data_conclusao = :data_conclusao, descricao = :descricao WHERE id = :id AND id_usuario = :usuario_id");
+        $consulta->bindParam(':titulo', $atividade['titulo']);
+        $consulta->bindParam(':data_conclusao', $atividade['data_conclusao']);
+        $consulta->bindParam(':descricao', $atividade['descricao']);
+        $consulta->bindParam(':id', $atividade['id']);
+        $consulta->bindParam(':usuario_id', $usuario_id);
+        $consulta->execute();
+
+        if ($consulta->rowCount() > 0) {
+            return ['mensagem' => 'Atividade atualizada com sucesso'];
+        } else {
+            http_response_code(404); // Not Found
+            return ['mensagem' => 'Atividade não encontrada'];
+        }
+    } catch (PDOException $e) {
+        http_response_code(500); // Internal Server Error
+        return ['mensagem' => 'Erro ao atualizar a atividade: ' . $e->getMessage()];
     }
 }
 
@@ -105,14 +140,19 @@ switch ($metodo_requisicao) {
     case 'DELETE':
         $usuario_id = verificarToken();
         $id_atividade = $_GET['id'] ?? null;
-    
+
         if (!$id_atividade) {
             http_response_code(400); // Bad Request
             echo json_encode(['mensagem' => 'ID da atividade não fornecido']);
             exit;
         }
-    
+
         echo json_encode(excluirAtividade($conexao, $id_atividade, $usuario_id));
+        break;
+    case 'PUT':
+        $usuario_id = verificarToken();
+        $dados = file_get_contents("php://input");
+        echo json_encode(atualizarAtividade($conexao, $dados, $usuario_id));
         break;
     default:
         http_response_code(405);

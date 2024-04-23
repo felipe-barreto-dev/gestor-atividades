@@ -5,6 +5,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Login from './pages/Login/Login.tsx';
 import Gestor from './pages/Gestor/Gestor.tsx';
 import Cadastro from './pages/Cadastro/Cadastro.tsx';
+import ProtectedRoute from './proxy/ProtectedRoute.tsx';
 
 const router = createBrowserRouter([
   {
@@ -17,7 +18,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/gestor",
-    element: <Gestor />,
+    element: <ProtectedRoute element={<Gestor />} />,
+  },
+  {
+    path: "/",
+    element: <ProtectedRoute element={<Gestor />} />,
   },
 ]);
 
