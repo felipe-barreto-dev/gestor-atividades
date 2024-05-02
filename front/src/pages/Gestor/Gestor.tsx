@@ -195,16 +195,47 @@ function Gestor() {
     <>
       <nav
         style={{ height: "10vh" }}
-        className="navbar navbar-expand-lg navbar-light bg-light"
+        className="navbar navbar-expand-lg navbar-light bg-light justify-content-between"
       >
         <a className="navbar-brand" href="#">
-          Navbar
+          Gestor de Atividades
         </a>
         <div>
           <ul className="navbar-nav ml-auto">
             <li className="nav-item">
+              <button
+                className="btn btn-link nav-link"
+                data-toggle="modal"
+                data-target="#myModalCreditos"
+              >
+                Créditos
+              </button>
+            </li>
+            <li className="nav-item">
               <button className="btn btn-link nav-link" onClick={handleLogout}>
                 Logout
+              </button>
+            </li>
+            <li className="nav-item">
+              <button
+                className="btn btn-link nav-link d-flex items-center"
+                onClick={handleLogout}
+              >
+                Mirabel
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  className="bi bi-person-circle ml-2"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                  <path
+                    fill-rule="evenodd"
+                    d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"
+                  />
+                </svg>
               </button>
             </li>
           </ul>
@@ -214,17 +245,6 @@ function Gestor() {
         style={{ height: "90vh" }}
         className="d-flex justify-content-center align-items-center bg-dark"
       >
-        {/* <div className="alert alert-success" role="alert">
-          A simple success alert—check it out!
-        </div>
-        <button
-          data-toggle="modal"
-          data-target="#myModalCreditos"
-          className="btn add"
-          id="add"
-        >
-          <i className="fa-solid fa-plus"></i>
-        </button> */}
         <div className="container" style={{ width: "80%" }}>
           <table className="table table-light table-striped">
             <thead className="table-dark">
@@ -363,7 +383,6 @@ function Gestor() {
                       }))
                     }
                     type="text"
-                    id="titulo"
                     className="form-control"
                   />
                 </div>
@@ -506,12 +525,12 @@ function Gestor() {
             </div>
             <div className="modal-body d-flex justify-content-center">
               <ul>
-                <li>Breno</li>
-                <li>Felipe</li>
-                <li>Luiz</li>
+                <li>Breno Mazzini Costa</li>
+                <li>Felipe Barreto Pereira</li>
+                <li>Luiz Felipe Barbosa Arruda</li>
                 <li>Mariana</li>
-                <li>Millena</li>
-                <li>Rafael</li>
+                <li>Millena Netto Souza</li>
+                <li>Rafael Ramiro Claro</li>
               </ul>
             </div>
           </div>
