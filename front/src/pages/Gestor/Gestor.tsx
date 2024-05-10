@@ -1,3 +1,4 @@
+import { format, isValid } from "date-fns";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -11,9 +12,18 @@ type Atividade = {
   status: string;
 };
 
+type Usuario = {
+  id: number;
+  login: string;
+  nome: string;
+  sobrenome: string;
+  data_nascimento: string;
+};
+
 const baseURL = "http://localhost:5000";
 
 function Gestor() {
+  const [usuario, setUsuario] = useState<Usuario>();
   const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [novaAtividade, setNovaAtividade] = useState<Atividade>(
     {} as Atividade
@@ -21,14 +31,15 @@ function Gestor() {
   const [atividadeEmEdicao, setAtividadeEmEdicao] = useState<Atividade>(
     {} as Atividade
   );
+  const [idAtividadeEmDelecao, setIdAtividadeEmDelecao] = useState<number>(0);
+  const [atividadesAtrasadas, setAtividadesAtrasadas] = useState<Atividade[]>(
+    []
+  );
 
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Limpar o cookie de autenticação
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
-    // Redirecionar para a página de login
     navigate("/login");
   };
 
@@ -36,7 +47,7 @@ function Gestor() {
     setAtividadeEmEdicao(atividade);
   };
 
-  const fetchAtividades = async () => {
+  const fetchAtividades = async (mostrarAtrasadas?: boolean) => {
     try {
       const cookie = document.cookie
         .split(";")
@@ -58,6 +69,16 @@ function Gestor() {
       }
       const data = await response.json();
       setAtividades(data);
+
+      if (mostrarAtrasadas) {
+        const atividadesAtrasadas = data.filter(
+          (atividade: Atividade) =>
+            new Date(atividade.data_conclusao) < new Date()
+        );
+        if (atividadesAtrasadas.length > 0) {
+          setAtividadesAtrasadas(atividadesAtrasadas);
+        }
+      }
     } catch (error) {
       console.error(error);
     }
@@ -86,9 +107,8 @@ function Gestor() {
         throw new Error("Erro ao criar atividade");
       }
 
-      const data = await response.json();
+      await response.json();
 
-      alert(data.mensagem);
       setNovaAtividade({} as Atividade);
       fetchAtividades();
     } catch (error) {
@@ -118,8 +138,7 @@ function Gestor() {
         throw new Error("Erro ao excluir a atividade");
       }
 
-      alert("Atividade excluída com sucesso");
-      fetchAtividades(); // Atualize a lista de atividades após a exclusão
+      fetchAtividades();
     } catch (error) {
       console.error("Erro ao excluir atividade:", error);
     }
@@ -148,8 +167,7 @@ function Gestor() {
         throw new Error("Erro ao atualizar atividade");
       }
 
-      const data = await response.json();
-      alert(data.mensagem);
+      await response.json();
       fetchAtividades();
     } catch (error) {
       console.error("Erro ao atualizar atividade:", error);
@@ -179,17 +197,55 @@ function Gestor() {
         throw new Error("Erro ao marcar a atividade como concluída");
       }
 
-      const data = await response.json();
-      alert(data.mensagem);
+      await response.json();
       fetchAtividades();
     } catch (error) {
       console.error("Erro ao marcar a atividade como concluída:", error);
     }
   };
 
+  async function fetchUsuario() {
+    try {
+      const cookie = document.cookie
+        .split(";")
+        .find((cookie) => cookie.trim().startsWith("token="));
+      if (!cookie) {
+        throw new Error("Token não encontrado no cookie");
+      }
+      const token = cookie.split("=")[1];
+      if (!token) return
+      const response = await fetch("http://localhost:5000/usuarios.php", {
+        headers: {
+          Authorization: token,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsuario(data);
+      } else {
+        console.error("Erro ao buscar nome do usuário:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar nome do usuário:", error);
+    }
+  }
+
+
   useEffect(() => {
-    fetchAtividades();
+    fetchAtividades(true);
+    fetchUsuario()
   }, []);
+
+  const formatarData = (data: string): string => {
+    const parsedDate = new Date(data);
+
+    // Verifica se a data é válida
+    if (isValid(parsedDate)) {
+      return format(parsedDate, "dd/MM/yyyy");
+    }
+
+    return ''
+  };
 
   return (
     <>
@@ -219,9 +275,8 @@ function Gestor() {
             <li className="nav-item">
               <button
                 className="btn btn-link nav-link d-flex items-center"
-                onClick={handleLogout}
               >
-                Mirabel
+                {usuario?.nome}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -232,7 +287,7 @@ function Gestor() {
                 >
                   <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
                   <path
-                    fill-rule="evenodd"
+                    fillRule="evenodd"
                     d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"
                   />
                 </svg>
@@ -277,8 +332,8 @@ function Gestor() {
                   <td id="content${atividade.index}">{atividade.titulo}</td>
                   <td id="content${atividade.index}">{atividade.descricao}</td>
                   <td>{atividade.status}</td>
-                  <td>{atividade.data_criacao}</td>
-                  <td>{atividade.data_conclusao}</td>
+                  <td>{formatarData(atividade.data_criacao)}</td>
+                  <td>{formatarData(atividade.data_conclusao)}</td>
                   <td className="text-center">
                     <button
                       data-toggle="modal"
@@ -295,6 +350,7 @@ function Gestor() {
                       data-toggle="modal"
                       data-target="#myModalDeletar"
                       className="btn delete"
+                      onClick={() => setIdAtividadeEmDelecao(atividade.id)}
                     >
                       <i className="fa fa-trash"></i>
                     </button>
@@ -309,38 +365,6 @@ function Gestor() {
                       ></i>
                     </button>
                   </td>
-
-                  <div id="myModalDeletar" className="modal fade" role="dialog">
-                    <div className="modal-dialog">
-                      <div className="modal-content">
-                        <div className="modal-header">
-                          <h4 className="modal-title" id="deleteAtividade"></h4>
-                        </div>
-                        <div className="modal-body">
-                          <input type="hidden" id="rowDelete" />
-                          <p>Confirmar exclusão?</p>
-                        </div>
-                        <div className="modal-footer">
-                          <button
-                            type="button"
-                            className="btn btn-primary btn-deletar-nao"
-                            data-dismiss="modal"
-                          >
-                            Não
-                          </button>
-                          <button
-                            id="confirmDelete"
-                            type="button"
-                            className="btn btn-primary btn-deletar-sim"
-                            data-dismiss="modal"
-                            onClick={() => deletarAtividade(atividade.id)}
-                          >
-                            Sim
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </tr>
               ))}
             </tbody>
@@ -359,6 +383,38 @@ function Gestor() {
               </tr>
             </tfoot>
           </table>
+        </div>
+      </div>
+
+      <div id="myModalDeletar" className="modal fade" role="dialog">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h4 className="modal-title" id="deleteAtividade"></h4>
+            </div>
+            <div className="modal-body">
+              <input type="hidden" id="rowDelete" />
+              <p>Confirmar exclusão?</p>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-primary btn-deletar-nao"
+                data-dismiss="modal"
+              >
+                Não
+              </button>
+              <button
+                id="confirmDelete"
+                type="button"
+                className="btn btn-primary btn-deletar-sim"
+                data-dismiss="modal"
+                onClick={() => deletarAtividade(idAtividadeEmDelecao)}
+              >
+                Sim
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -532,6 +588,52 @@ function Gestor() {
                 <li>Millena Netto Souza</li>
                 <li>Rafael Ramiro Claro</li>
               </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`modal fade ${atividadesAtrasadas.length ? "show" : ""}`}
+        style={{ display: atividadesAtrasadas.length ? "block" : "none" }}
+        role="dialog"
+        aria-labelledby="exampleModalCenterTitle"
+        aria-modal="true"
+      >
+        <div className="modal-dialog modal-dialog-centered" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="exampleModalCenterTitle">
+                Atividades Atrasadas
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+                onClick={() => setAtividadesAtrasadas([])}
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              {atividadesAtrasadas.map((atividade, index) => (
+                <div key={index}>
+                  <p>
+                    {atividade.id} - {atividade.titulo}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-dismiss="modal"
+                onClick={() => setAtividadesAtrasadas([])}
+              >
+                Fechar
+              </button>
             </div>
           </div>
         </div>

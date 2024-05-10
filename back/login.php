@@ -62,7 +62,6 @@ switch ($metodo_requisicao) {
             echo json_encode(array("mensagem" => "Credenciais inválidas"));
             exit;
         }
-        break;
     default:
         http_response_code(405);
         echo json_encode(['mensagem' => 'Método não permitido']);

@@ -1,4 +1,6 @@
 <?php
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 // Definindo o cabeçalho para permitir acesso de qualquer origem (CORS)
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
@@ -34,6 +36,33 @@ function adicionarUsuario($conexao, $dados)
     return json_encode(['mensagem' => 'Usuario adicionada com sucesso']);
 }
 
+function verificarToken()
+{
+    $token = null;
+
+    $headers = apache_request_headers();
+
+    if (isset($headers['Authorization'])) {
+        $token = str_replace('Bearer ', '', $headers['Authorization']);
+    }
+
+    if ($token) {
+        try {
+            $decoded = JWT::decode($token, new Key(SECRET_KEY, 'HS256'));
+
+            return $decoded->usuario_id;
+        } catch (Exception $e) {
+            http_response_code(401); // Unauthorized
+            echo json_encode(array("mensagem" => "Token inválido"));
+            exit;
+        }
+    } else {
+        http_response_code(401); // Unauthorized
+        echo json_encode(array("mensagem" => "Token não fornecido"));
+        exit;
+    }
+}
+
 // Roteamento das solicitações
 $metodo_requisicao = $_SERVER["REQUEST_METHOD"];
 switch ($metodo_requisicao) {
@@ -47,6 +76,35 @@ switch ($metodo_requisicao) {
         $dados = file_get_contents("php://input");
         echo adicionarUsuario($conexao, $dados);
         break;
+    case 'GET':
+        $token = $_SERVER["HTTP_AUTHORIZATION"];
+        if ($token) {
+            try {
+                $usuario_id = verificarToken();
+
+                $consulta = $conexao->prepare("SELECT nome FROM usuarios WHERE id = :id");
+                $consulta->bindParam(':id', $usuario_id);
+                $consulta->execute();
+                $usuario = $consulta->fetch(PDO::FETCH_ASSOC);
+
+                if ($usuario) {
+                    echo json_encode(array("nome" => $usuario['nome']));
+                    exit;
+                } else {
+                    http_response_code(404);
+                    echo json_encode(array("mensagem" => "Usuário não encontrado"));
+                    exit;
+                }
+            } catch (Exception $e) {
+                http_response_code(401);
+                echo json_encode(array("mensagem" => "Token inválido"));
+                exit;
+            }
+        } else {
+            http_response_code(401);
+            echo json_encode(array("mensagem" => "Token não fornecido"));
+            exit;
+        }
     default:
         // Método não permitido
         http_response_code(405);
