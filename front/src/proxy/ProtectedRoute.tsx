@@ -1,7 +1,7 @@
 import React from 'react'
 import { Navigate } from 'react-router-dom';
 
-const ProtectedRoute = ({ element }: { element: React.ReactNode }) => {// Função que verifica se o usuário está autenticado
+const ProtectedRoute = ({ element }: { element: React.ReactNode }) => {
   const isAuthenticated = () => {
     const token = document.cookie
       .split(";")

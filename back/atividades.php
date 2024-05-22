@@ -21,18 +21,17 @@ function verificarToken()
 
             return $decoded->usuario_id;
         } catch (Exception $e) {
-            http_response_code(401); // Unauthorized
+            http_response_code(401);
             echo json_encode(array("mensagem" => "Token inválido"));
             exit;
         }
     } else {
-        http_response_code(401); // Unauthorized
+        http_response_code(401);
         echo json_encode(array("mensagem" => "Token não fornecido"));
         exit;
     }
 }
 
-// Definindo o cabeçalho para permitir acesso de qualquer origem (CORS)
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH");
@@ -47,7 +46,7 @@ try {
     $conexao = new PDO("mysql:host=$servidor;dbname=$banco_de_dados", $usuario, $senha);
     $conexao->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    http_response_code(500); // Internal Server Error
+    http_response_code(500);
     echo json_encode(["mensagem" => "Erro na conexão com o banco de dados: " . $e->getMessage()]);
     exit();
 }
@@ -66,7 +65,7 @@ function adicionarAtividade($conexao, $dados, $usuario_id)
     $atividade = json_decode($dados, true);
     $consulta = $conexao->prepare("INSERT INTO atividades (titulo, data_criacao, id_usuario, data_conclusao, descricao) VALUES (:titulo, :data_criacao, :id_usuario, :data_conclusao, :descricao)");
     $consulta->bindParam(':titulo', $atividade['titulo']);
-    $consulta->bindValue(':data_criacao', date('Y-m-d H:i:s')); // data de criação atual
+    $consulta->bindValue(':data_criacao', date('Y-m-d H:i:s'));
     $consulta->bindParam(':id_usuario', $usuario_id);
     $consulta->bindParam(':data_conclusao', $atividade['data_conclusao']);
     $consulta->bindParam(':descricao', $atividade['descricao']);
@@ -84,7 +83,7 @@ function excluirAtividade($conexao, $id_atividade, $usuario_id)
     if ($consulta->rowCount() > 0) {
         return ['mensagem' => 'Atividade excluída com sucesso'];
     } else {
-        http_response_code(404); // Not Found
+        http_response_code(404);
         return ['mensagem' => 'Atividade não encontrada'];
     }
 }
@@ -94,7 +93,7 @@ function atualizarAtividade($conexao, $dados, $usuario_id)
     $atividade = json_decode($dados, true);
 
     if (!isset($atividade['id'])) {
-        http_response_code(400); // Bad Request
+        http_response_code(400);
         echo json_encode(['mensagem' => 'ID da atividade não fornecido']);
         exit;
     }
@@ -111,11 +110,11 @@ function atualizarAtividade($conexao, $dados, $usuario_id)
         if ($consulta->rowCount() > 0) {
             return ['mensagem' => 'Atividade atualizada com sucesso'];
         } else {
-            http_response_code(404); // Not Found
+            http_response_code(404);
             return ['mensagem' => 'Atividade não encontrada'];
         }
     } catch (PDOException $e) {
-        http_response_code(500); // Internal Server Error
+        http_response_code(500);
         return ['mensagem' => 'Erro ao atualizar a atividade: ' . $e->getMessage()];
     }
 }
@@ -132,11 +131,11 @@ function atualizarStatusAtividade($conexao, $usuario_id, $id_atividade, $novo_st
         if ($consulta->rowCount() > 0) {
             return ['mensagem' => 'Status da atividade atualizado para concluído'];
         } else {
-            http_response_code(404); // Not Found
+            http_response_code(404);
             return ['mensagem' => 'Atividade não encontrada'];
         }
     } catch (PDOException $e) {
-        http_response_code(500); // Internal Server Error
+        http_response_code(500);
         return ['mensagem' => 'Erro ao atualizar o status da atividade: ' . $e->getMessage()];
     }
 }
@@ -145,7 +144,6 @@ function atualizarStatusAtividade($conexao, $usuario_id, $id_atividade, $novo_st
 $metodo_requisicao = $_SERVER["REQUEST_METHOD"];
 switch ($metodo_requisicao) {
     case 'OPTIONS':
-        // Responder ao preflight request (pré-requisição)
         header("Access-Control-Allow-Origin: *");
         header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH");
         header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
@@ -164,7 +162,7 @@ switch ($metodo_requisicao) {
         $id_atividade = $_GET['id'] ?? null;
 
         if (!$id_atividade) {
-            http_response_code(400); // Bad Request
+            http_response_code(400);
             echo json_encode(['mensagem' => 'ID da atividade não fornecido']);
             exit;
         }
@@ -183,7 +181,7 @@ switch ($metodo_requisicao) {
         $novo_status = 'concluído';
 
         if (!$id_atividade) {
-            http_response_code(400); // Bad Request
+            http_response_code(400);
             echo json_encode(['mensagem' => 'ID da atividade não fornecido']);
             exit;
         }
