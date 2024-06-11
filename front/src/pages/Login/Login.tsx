@@ -62,7 +62,8 @@ export default function Login() {
             <button onClick={autenticar} className="btn btn-primary">Entrar</button>
           </div>
           <p className="text-end mt-2">
-            <Link to="/cadastro">Cadastrar</Link>
+            Não tem uma conta?
+            <Link className="ml-2" to="/cadastro">Cadastrar</Link>
           </p>
         </form>
       </div>

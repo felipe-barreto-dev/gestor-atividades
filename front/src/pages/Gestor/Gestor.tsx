@@ -174,6 +174,7 @@ function Gestor() {
     }
   };
 
+
   const marcarAtividadeConcluida = async (id: number) => {
     try {
       const cookie = document.cookie
@@ -240,6 +241,16 @@ function Gestor() {
 
     if (isValid(parsedDate)) {
       return format(parsedDate, "dd/MM/yyyy");
+    }
+
+    return "";
+  };
+
+  const formatarDataParaEdicao = (dateString: string) => {
+    const date = new Date(dateString);
+
+    if (isValid(date)) {
+      return date.toISOString().split("T")[0];
     }
 
     return "";
@@ -431,9 +442,11 @@ function Gestor() {
                   </label>
                   <input
                     type="date"
-                    id="data_conclusao"
+                    id="data_conclusao_edicao"
                     className="form-control"
-                    value={atividadeEmEdicao?.data_conclusao || ""}
+                    value={formatarDataParaEdicao(
+                      atividadeEmEdicao?.data_conclusao
+                    )}
                     onChange={(e) =>
                       setAtividadeEmEdicao((previous) => ({
                         ...previous,
@@ -509,7 +522,7 @@ function Gestor() {
                   </label>
                   <input
                     type="date"
-                    id="data_conclusao"
+                    id="data_conclusao_criacao"
                     className="form-control"
                     value={novaAtividade.data_conclusao}
                     onChange={(e) =>

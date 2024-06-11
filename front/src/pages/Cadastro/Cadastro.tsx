@@ -119,7 +119,8 @@ export default function Cadastro() {
             </button>
           </div>
           <p className="text-end mt-2">
-            <Link to="/login">Entrar</Link>
+            Já possui uma conta?
+            <Link className="ml-2" to="/login">Entrar</Link>
           </p>
         </form>
       </div>
